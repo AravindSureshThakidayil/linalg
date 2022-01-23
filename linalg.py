@@ -33,17 +33,21 @@ class Matrix():
                 raise DimensionalError("Invalid columns")
         if len(grid) == rows:
             self.grid = grid
+            self.order = (rows, columns)
             if rows == columns:
                 self.determinant = determinant(grid)
         else:
             raise DimensionalError("Number of rows do not match")
     def transpose(self):
-        aa = self.grid[0][0]
-        ab = self.grid[0][1]
-        ba = self.grid[1][0]
-        bb = self.grid[1][1]
-        self.grid = [[aa, ba], [ab, bb]]
-    def invert(self):
+        buffer = self.grid
+        new_grid =[]
+        for i in range(self.order[1]):
+          new_grid.append([])
+          for j in range(self.order[0]):
+            new_grid[i].append(buffer[j][i])
+        self.grid = new_grid
+        self.order = (self.order[1],self.order[0])
+    def inverse(self):
         d = self.determinant
         if d != 0:
             aa = self.grid[0][0] / d
@@ -52,33 +56,15 @@ class Matrix():
             bb = self.grid[1][1] / d
             self.grid = [[bb, -ab], [-ba, aa]]
         else:
-            raise NonInvertibleMatrix
-    def multiply(self, B):
-        if type(B) == Matrix:
-            Aaa = self.grid[0][0]
-            Aab = self.grid[0][1]
-            Aba = self.grid[1][0]
-            Abb = self.grid[1][1]
-            Baa = B.grid[0][0]
-            Bab = B.grid[0][1]
-            Bba = B.grid[1][0]
-            Bbb = B.grid[1][1]
-            Paa = Aaa*Baa + Aab*Bba
-            Pab = Aaa*Bab + Aab*Bbb
-            Pba = Aba*Baa + Abb*Bba
-            Pbb = Aba*Bab + Abb*Bbb
-            return Matrix(Paa, Pab, Pba, Pbb)
-        elif type(B) == Vector:
-            Aaa = self.grid[0][0]
-            Aab = self.grid[0][1]
-            Aba = self.grid[1][0]
-            Abb = self.grid[1][1]
-            Ba = B.grid[0]
-            Bb = B.grid[1]
-            Pa, Pb = Aaa * Ba + Aab * Bb, Aba * Ba + Abb * Bb
-            return Vector(Pa, Pb) 
+            print('non-invertible.')
+    def multiply(self1,self2):
+        aa = self1.grid[0][0] * self2.grid[0][0] + self1.grid[0][1] * self2.grid[1][0]
+        ab = self1.grid[0][0] * self2.grid[0][1] + self1.grid[0][1] * self2.grid[1][1]
+        ba = self1.grid[1][0] * self2.grid[0][0] + self1.grid[1][1] * self2.grid[1][0]
+        bb = self1.grid[1][0] * self2.grid[0][1] + self1.grid[1][1] * self2.grid[1][1]
+        self1.product= [[aa, ab], [ba, bb]]        
 
 class NonInvertibleMatrix(Exception):
     pass
 class DimensionalError(Exception):
-    pass
+    pass        
